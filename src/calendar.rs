@@ -2,35 +2,14 @@ use chrono::DateTime;
 use chrono::Datelike;
 use chrono::Local;
 use chrono::NaiveDate;
-use fltk::*;
+use fltk::{app, draw, menu, prelude::*, table, window};
 use std::cell::RefCell;
 use std::rc::Rc;
-
-fn draw_header(txt: &str, x: i32, y: i32, w: i32, h: i32) {
-    draw::push_clip(x, y, w, h);
-    draw::draw_box(FrameType::ThinUpBox, x, y, w, h, Color::FrameDefault);
-    draw::set_draw_color(Color::Black);
-    draw::draw_text2(txt, x, y, w, h, Align::Center);
-    draw::pop_clip();
-}
-
-fn draw_data(day: i32, x: i32, y: i32, w: i32, h: i32, selected: bool) {
-    draw::push_clip(x, y, w, h);
-    if selected {
-        draw::set_draw_color(Color::from_u32(0xbcd9ea));
-    } else {
-        draw::set_draw_color(Color::White);
-    }
-    draw::draw_rectf(x, y, w, h);
-    draw::set_draw_color(Color::Gray0);
-    draw::draw_text2(&format!("{}", day), x, y, w, h, Align::Center);
-    draw::pop_clip();
-}
 
 /// Defines a calendar dialog
 pub struct Calendar {
     wind: window::Window,
-    table: table::Table,
+    table: table::TableRow,
     month_choice: menu::Choice,
     year_choice: menu::Choice,
 }
@@ -50,8 +29,8 @@ impl Calendar {
             year_choice.add_choice(&format!("{}", i));
         }
         year_choice.set_value(curr_year - 1900);
-        let mut table = table::Table::new(5, 50, 390, 250, "");
-        wind.resizable(&table);
+        let mut table = table::TableRow::new(5, 50, 390, 250, "");
+        table.set_type(table::TableRowSelectMode::Single);
         table.set_rows(5);
         table.set_cols(7);
         table.set_col_header(true);
@@ -123,6 +102,14 @@ impl Calendar {
             *curr_year_rc.borrow_mut() = c.value() + 1900;
             c.parent().unwrap().redraw();
         });
+        table.handle2(|t, ev| {
+            if ev == Event::Push && app::event_clicks() {
+                t.top_window().unwrap().hide();
+                true
+            } else {
+                false
+            }
+        });
         while wind.shown() {
             app::wait();
         }
@@ -148,11 +135,32 @@ impl Calendar {
             None
         } else {
             let day = r * 7 + c + 1;
-            Some(NaiveDate::from_ymd(
+            NaiveDate::from_ymd_opt(
                 self.year_choice.value() + 1900,
                 self.month_choice.value() as u32 + 1,
                 day as u32,
-            ))
+            )
         }
     }
+}
+
+fn draw_header(txt: &str, x: i32, y: i32, w: i32, h: i32) {
+    draw::push_clip(x, y, w, h);
+    draw::draw_box(FrameType::ThinUpBox, x, y, w, h, Color::FrameDefault);
+    draw::set_draw_color(Color::Black);
+    draw::draw_text2(txt, x, y, w, h, Align::Center);
+    draw::pop_clip();
+}
+
+fn draw_data(day: i32, x: i32, y: i32, w: i32, h: i32, selected: bool) {
+    draw::push_clip(x, y, w, h);
+    if selected {
+        draw::set_draw_color(Color::from_u32(0xbcd9ea));
+    } else {
+        draw::set_draw_color(Color::White);
+    }
+    draw::draw_rectf(x, y, w, h);
+    draw::set_draw_color(Color::Gray0);
+    draw::draw_text2(&format!("{}", day), x, y, w, h, Align::Center);
+    draw::pop_clip();
 }
