@@ -3,8 +3,7 @@ use chrono::Datelike;
 use chrono::Local;
 use chrono::NaiveDate;
 use fltk::{app, draw, menu, prelude::*, table, window};
-use std::cell::RefCell;
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
 
 /// Defines a calendar dialog
 pub struct Calendar {
@@ -17,9 +16,11 @@ pub struct Calendar {
 impl Calendar {
     /// Creates a new calendar dialog
     pub fn new(x: i32, y: i32) -> Self {
+        // get today's date
         let local: DateTime<Local> = Local::now();
         let curr = (local.month() - 1) as i32;
         let curr_year = local.year();
+        // create window with month and year choice widgets
         let mut wind = window::Window::new(x, y, 400, 300, "Calendar");
         let mut month_choice = menu::Choice::new(100, 5, 80, 40, "");
         month_choice.add_choice("Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec");
@@ -29,6 +30,7 @@ impl Calendar {
             year_choice.add_choice(&format!("{}", i));
         }
         year_choice.set_value(curr_year - 1900);
+        // Create a table with the days of the selected month
         let mut table = table::TableRow::new(5, 50, 390, 250, "");
         table.set_type(table::TableRowSelectMode::Single);
         table.set_rows(5);
@@ -92,16 +94,20 @@ impl Calendar {
         });
 
         let curr_rc = curr.clone();
+        // redraw table when the month changes
         month_choice.set_callback2(move |c| {
             *curr_rc.borrow_mut() = c.value() + 1;
             c.parent().unwrap().redraw();
         });
 
         let curr_year_rc = curr_year.clone();
+        // redraw table when the year changes
         year_choice.set_callback2(move |c| {
             *curr_year_rc.borrow_mut() = c.value() + 1900;
             c.parent().unwrap().redraw();
         });
+
+        // choose the day by double clicking a cell
         table.handle2(|t, ev| {
             if ev == Event::Push && app::event_clicks() {
                 t.top_window().unwrap().hide();
@@ -110,9 +116,12 @@ impl Calendar {
                 false
             }
         });
+
+        // Keep the window shown awaiting input
         while wind.shown() {
             app::wait();
         }
+
         Self {
             wind,
             table,
@@ -130,6 +139,7 @@ impl Calendar {
     pub fn get_date(&self) -> Option<chrono::naive::NaiveDate> {
         let mut r = 0;
         let mut c = 0;
+        // get table selection
         self.table.get_selection(&mut r, &mut c, &mut 0, &mut 0);
         if r == -1 || c == -1 {
             None
@@ -144,6 +154,7 @@ impl Calendar {
     }
 }
 
+// draw header with day names
 fn draw_header(txt: &str, x: i32, y: i32, w: i32, h: i32) {
     draw::push_clip(x, y, w, h);
     draw::draw_box(FrameType::ThinUpBox, x, y, w, h, Color::FrameDefault);
@@ -152,6 +163,7 @@ fn draw_header(txt: &str, x: i32, y: i32, w: i32, h: i32) {
     draw::pop_clip();
 }
 
+// draw the numbers
 fn draw_data(day: i32, x: i32, y: i32, w: i32, h: i32, selected: bool) {
     draw::push_clip(x, y, w, h);
     if selected {

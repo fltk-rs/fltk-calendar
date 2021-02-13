@@ -9,7 +9,7 @@ Add the following to your Cargo.toml:
 fltk-calendar = "0.1"
 ```
 
-Then the dialog can be instatiated use the Calendar::new(x, y) or Calendar::default() functions.
+Then the dialog can be instatiated use the Calendar::new(x, y) or Calendar::default() functions. And the date can be chosen by double clicking on a cell.
 
 ```rust
 use fltk::*;
