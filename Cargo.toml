@@ -17,5 +17,5 @@ name = "fltk_calendar"
 path = "src/lib.rs"
 
 [dependencies]
-fltk = "0.14"
+fltk = "0.15"
 chrono = "0.4"
