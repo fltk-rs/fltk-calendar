@@ -7,7 +7,7 @@ A calendar dialog for fltk-rs. It's separated into its own crate since it requir
 Add the following to your Cargo.toml:
 ```toml
 [dependencies]
-fltk-calendar = "0.1"
+fltk-calendar = "0.3"
 ```
 
 Then the dialog can be instatiated use the Calendar::new(x, y) or Calendar::default() functions. And the date can be chosen by double clicking on a cell.
