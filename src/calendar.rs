@@ -99,17 +99,15 @@ impl Calendar {
             _ => (),
         });
 
-        let curr_rc = curr.clone();
         // redraw table when the month changes
         month_choice.set_callback(move |c| {
-            *curr_rc.borrow_mut() = c.value() + 1;
+            *curr.borrow_mut() = c.value() + 1;
             c.parent().unwrap().redraw();
         });
 
-        let curr_year_rc = curr_year.clone();
         // redraw table when the year changes
         year_choice.set_callback(move |c| {
-            *curr_year_rc.borrow_mut() = c.value() + 1900;
+            *curr_year.borrow_mut() = c.value() + 1900;
             c.parent().unwrap().redraw();
         });
 

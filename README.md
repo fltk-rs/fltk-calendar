@@ -12,7 +12,7 @@ fltk-calendar = "0.1"
 Then the dialog can be instatiated use the Calendar::new(x, y) or Calendar::default() functions. And the date can be chosen by double clicking on a cell.
 
 ```rust
-use fltk::*;
+use fltk::{prelude::*, *};
 use fltk_calendar::calendar;
 use chrono::prelude::*;
 
@@ -22,7 +22,7 @@ fn main() {
     let mut but = button::Button::new(160, 200, 80, 40, "Click");
     win.end();
     win.show();
-    but.set_callback(move || {
+    but.set_callback(move |_| {
         let cal = calendar::Calendar::default(); // or calendar::Calendar::new(200, 100);
         let date = cal.get_date();
         println!("{:?}", date);
