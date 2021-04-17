@@ -2,7 +2,13 @@ use chrono::DateTime;
 use chrono::Datelike;
 use chrono::Local;
 use chrono::NaiveDate;
-use fltk::{app, draw, menu, prelude::*, table, window};
+use fltk::{
+    app, draw,
+    enums::{Align, Color, Event, Font, FrameType},
+    menu,
+    prelude::*,
+    table, window,
+};
 use std::{cell::RefCell, rc::Rc};
 
 /// Defines a calendar dialog
@@ -48,7 +54,7 @@ impl Calendar {
 
         let curr_rc = curr.clone();
         let curr_year_rc = curr_year.clone();
-        table.draw_cell2(move |t, ctx, row, col, x, y, w, h| match ctx {
+        table.draw_cell(move |t, ctx, row, col, x, y, w, h| match ctx {
             table::TableContext::StartPage => draw::set_font(Font::Helvetica, 14),
             table::TableContext::ColHeader => {
                 let day = match col + 1 {
@@ -95,20 +101,20 @@ impl Calendar {
 
         let curr_rc = curr.clone();
         // redraw table when the month changes
-        month_choice.set_callback2(move |c| {
+        month_choice.set_callback(move |c| {
             *curr_rc.borrow_mut() = c.value() + 1;
             c.parent().unwrap().redraw();
         });
 
         let curr_year_rc = curr_year.clone();
         // redraw table when the year changes
-        year_choice.set_callback2(move |c| {
+        year_choice.set_callback(move |c| {
             *curr_year_rc.borrow_mut() = c.value() + 1900;
             c.parent().unwrap().redraw();
         });
 
         // choose the day by double clicking a cell
-        table.handle2(|t, ev| {
+        table.handle(|t, ev| {
             if ev == Event::Push && app::event_clicks() {
                 t.top_window().unwrap().hide();
                 true
@@ -137,10 +143,8 @@ impl Calendar {
     }
     /// Get the date selected by the calendar dialog
     pub fn get_date(&self) -> Option<chrono::naive::NaiveDate> {
-        let mut r = 0;
-        let mut c = 0;
         // get table selection
-        self.table.get_selection(&mut r, &mut c, &mut 0, &mut 0);
+        let (r, c, _, _) = self.table.get_selection();
         if r == -1 || c == -1 {
             None
         } else {
