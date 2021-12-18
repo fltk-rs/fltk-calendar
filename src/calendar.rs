@@ -22,6 +22,7 @@ pub struct Calendar {
 impl Calendar {
     /// Creates a new calendar dialog
     pub fn new(x: i32, y: i32) -> Self {
+        app::App::default();
         // get today's date
         let local: DateTime<Local> = Local::now();
         let curr = (local.month() - 1) as i32;
