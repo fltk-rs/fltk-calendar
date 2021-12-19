@@ -11,6 +11,8 @@ use fltk::{
 };
 use std::{cell::RefCell, rc::Rc};
 
+const DAYS: &[&str] = &["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
 /// Defines a calendar dialog
 pub struct Calendar {
     wind: window::Window,
@@ -22,7 +24,9 @@ pub struct Calendar {
 impl Calendar {
     /// Creates a new calendar dialog
     pub fn new(x: i32, y: i32) -> Self {
-        app::App::default();
+        if !app::is_initialized() {
+            app::App::default();
+        }
         // get today's date
         let local: DateTime<Local> = Local::now();
         let curr = (local.month() - 1) as i32;
@@ -53,51 +57,52 @@ impl Calendar {
         let curr = Rc::from(RefCell::from(curr + 1));
         let curr_year = Rc::from(RefCell::from(curr_year));
 
-        let curr_rc = curr.clone();
-        let curr_year_rc = curr_year.clone();
-        table.draw_cell(move |t, ctx, row, col, x, y, w, h| match ctx {
-            table::TableContext::StartPage => draw::set_font(Font::Helvetica, 14),
-            table::TableContext::ColHeader => {
-                let day = match col + 1 {
-                    1 => "Mon",
-                    2 => "Tue",
-                    3 => "Wed",
-                    4 => "Thu",
-                    5 => "Fri",
-                    6 => "Sat",
-                    7 => "Sun",
-                    _ => unreachable!(),
-                };
-                draw_header(day, x, y, w, h)
-            }
-            table::TableContext::Cell => {
-                let day = row * 7 + col + 1;
-                let max_days = match *curr_rc.borrow() {
-                    1 => 31,
-                    2 => {
-                        if *curr_year_rc.borrow() % 4 == 0 {
-                            29
-                        } else {
-                            28
+        table.draw_cell({
+            let curr = curr.clone();
+            let curr_year = curr_year.clone();
+            move |t, ctx, row, col, x, y, w, h| {
+                let curr_year = curr_year.borrow();
+                let curr = curr.borrow();
+                let first =
+                NaiveDate::from_ymd(*curr_year, *curr as u32, 1).weekday() as i32;
+                let day_idx = col + first;
+                let day_idx = if day_idx > 6 { day_idx - 7 } else { day_idx };
+                match ctx {
+                    table::TableContext::StartPage => draw::set_font(Font::Helvetica, 14),
+                    table::TableContext::ColHeader => {
+                        let day = DAYS[day_idx as usize];
+                        draw_header(day, x, y, w, h)
+                    }
+                    table::TableContext::Cell => {
+                        let day = row * 7 + col + 1;
+                        let max_days = match *curr {
+                            1 => 31,
+                            2 => {
+                                if *curr_year % 4 == 0 {
+                                    29
+                                } else {
+                                    28
+                                }
+                            }
+                            3 => 31,
+                            4 => 30,
+                            5 => 31,
+                            6 => 30,
+                            7 => 31,
+                            8 => 31,
+                            9 => 30,
+                            10 => 31,
+                            11 => 30,
+                            12 => 31,
+                            _ => unreachable!(),
+                        };
+                        if day < (max_days + 1) {
+                            draw_data(day, x, y, w, h, t.is_selected(row, col));
                         }
                     }
-                    3 => 31,
-                    4 => 30,
-                    5 => 31,
-                    6 => 30,
-                    7 => 31,
-                    8 => 31,
-                    9 => 30,
-                    10 => 31,
-                    11 => 30,
-                    12 => 31,
-                    _ => unreachable!(),
-                };
-                if day < (max_days + 1) {
-                    draw_data(day, x, y, w, h, t.is_selected(row, col));
+                    _ => (),
                 }
             }
-            _ => (),
         });
 
         // redraw table when the month changes
