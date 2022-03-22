@@ -4,7 +4,7 @@ use chrono::Local;
 use chrono::NaiveDate;
 use fltk::{
     app, draw,
-    enums::{Align, Color, Event, Font, FrameType},
+    enums::{Align, Color, Font, FrameType},
     menu,
     prelude::*,
     table, window,
@@ -118,13 +118,11 @@ impl Calendar {
         });
 
         // choose the day by double clicking a cell
-        table.handle(|t, ev| {
-            if ev == Event::Push && app::event_clicks() {
+        table.set_callback(|t| {
+            if app::event_clicks() {
                 t.top_window().unwrap().hide();
-                true
-            } else {
-                false
             }
+            
         });
 
         // Keep the window shown awaiting input

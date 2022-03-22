@@ -1,6 +1,6 @@
 [package]
 name = "fltk-calendar"
-version = "0.3.5"
+version = "0.3.6"
 authors = ["MoAlyousef <mohammed.alyousef@neurosrg.com>"]
 edition = "2018"
 description = "A calendar dialog for fltk-rs"
