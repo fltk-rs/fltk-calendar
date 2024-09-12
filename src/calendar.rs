@@ -7,7 +7,7 @@ use fltk::{
     enums::{Align, Color, Font, FrameType},
     menu,
     prelude::*,
-    table, window,
+    group, table, window,
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -31,6 +31,7 @@ impl Calendar {
         let local: DateTime<Local> = Local::now();
         let curr = (local.month() - 1) as i32;
         let curr_year = local.year();
+        group::Group::set_current(None::<&group::Group>);
         // create window with month and year choice widgets
         let mut wind = window::Window::new(x, y, 400, 300, "Calendar");
         let mut month_choice = menu::Choice::new(100, 5, 80, 40, "");
@@ -64,7 +65,7 @@ impl Calendar {
                 let curr_year = curr_year.borrow();
                 let curr = curr.borrow();
                 let first =
-                NaiveDate::from_ymd(*curr_year, *curr as u32, 1).weekday() as i32;
+                NaiveDate::from_ymd_opt(*curr_year, *curr as u32, 1).unwrap().weekday() as i32;
                 let day_idx = col + first;
                 let day_idx = if day_idx > 6 { day_idx - 7 } else { day_idx };
                 match ctx {
