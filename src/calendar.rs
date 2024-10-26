@@ -144,6 +144,11 @@ impl Calendar {
         s.wind.free_position();
         s
     }
+    //Instantiate with label
+    pub fn with_label(mut self, label: &str) -> Self{
+        self.wind.set_label(label);
+        self
+    }
     /// Get the date selected by the calendar dialog
     pub fn get_date(&self) -> Option<chrono::naive::NaiveDate> {
         // get table selection
